@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo:8
+    container_name: doomsday-ready-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: doomsday-ready-app
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/doomsday_ready
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongodb_data:
