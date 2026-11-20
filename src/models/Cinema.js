@@ -12,19 +12,28 @@ const cinemaSchema = new mongoose.Schema(
     bundleSizes: {
       type: [Number],
       required: true,
-      validate: {
-        validator: function (sizes) {
-          return (
-            sizes.length >= 1 &&
-            sizes.length <= 10 &&
-            sizes.every(
-              (size) => Number.isInteger(size) && size >= 1 && size <= 500,
-            ) &&
-            new Set(sizes).size === sizes.length
-          );
+      validate: [
+        {
+          validator: function (sizes) {
+            return sizes.length >= 1 && sizes.length <= 10;
+          },
+          message: "A cinema must have 1 to 10 bundle sizes.",
         },
-        message: "Invalid cinema bundle sizes.",
-      },
+        {
+          validator: function (sizes) {
+            return sizes.every(
+              (size) => Number.isInteger(size) && size >= 1 && size <= 500,
+            );
+          },
+          message: "Each bundle size must be between 1 and 500.",
+        },
+        {
+          validator: function (sizes) {
+            return new Set(sizes).size === sizes.length;
+          },
+          message: "Duplicate bundle sizes are not allowed.",
+        },
+      ],
     },
   },
   {
